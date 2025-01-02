@@ -2,9 +2,8 @@ let tg = window.Telegram.WebApp;
 tg.expand();
 
 let lastScannedData = null;
-let lastCode = null; // для предотвращения повторного сканирования
+let lastCode = null;
 
-// Функция для показа QR сканера
 function showQRScanner() {
     const par = {
         text: "Наведите камеру на QR код"
@@ -12,9 +11,7 @@ function showQRScanner() {
     tg.showScanQrPopup(par);
 }
 
-// Функция обработки QR кода
 function processQRCode(data) {
-    // Проверяем, не тот же это код
     if (data === lastCode) {
         return;
     }
@@ -22,22 +19,18 @@ function processQRCode(data) {
     lastCode = data;
     lastScannedData = data;
     
-    // Показываем результат
     document.getElementById('result').textContent = `Отсканировано: ${data}`;
     document.getElementById('sendButton').style.display = 'block';
 }
 
-// Обработчик кнопки сканирования
 document.getElementById('scanButton').addEventListener('click', () => {
     showQRScanner();
 });
 
-// Добавляем обработчик события сканирования
 tg.onEvent('qrTextReceived', (event) => {
     processQRCode(event.data);
 });
 
-// Обработчик кнопки отправки
 document.getElementById('sendButton').addEventListener('click', async () => {
     if (lastScannedData) {
         await sendToGoogleSheets(lastScannedData);
@@ -48,19 +41,28 @@ async function sendToGoogleSheets(qrData) {
     const timestamp = new Date().toISOString();
     
     try {
+        console.log('Отправляем данные:', { timestamp, qrData });
+
         const response = await fetch('https://script.google.com/macros/s/AKfycbwtade14oC_eU7tmCxea1dtus_4J7HsEgf9SEwv5_FmjACMKrz5eFhjkoa3tLi4XKz6lQ/exec', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
             },
+            mode: 'cors',
             body: JSON.stringify({
                 timestamp: timestamp,
                 qrData: qrData
             })
         });
 
+        console.log('Ответ сервера:', response);
+
+        const responseData = await response.text();
+        console.log('Данные ответа:', responseData);
+
         if (!response.ok) {
-            throw new Error('Ошибка при отправке данных');
+            throw new Error(`Ошибка при отправке данных: ${response.status} ${responseData}`);
         }
 
         document.getElementById('result').textContent += '\nДанные успешно сохранены!';
@@ -68,7 +70,7 @@ async function sendToGoogleSheets(qrData) {
         lastScannedData = null;
         lastCode = null;
     } catch (error) {
-        document.getElementById('result').textContent += '\nОшибка при сохранении данных';
-        console.error('Error:', error);
+        console.error('Полная ошибка:', error);
+        document.getElementById('result').textContent += `\nОшибка при сохранении данных: ${error.message}`;
     }
 } 
