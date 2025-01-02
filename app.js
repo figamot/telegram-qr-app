@@ -110,4 +110,8 @@ if (!window.Telegram.WebApp.initData) {
         history.push({ qrData, timestamp });
         localStorage.setItem('scan_history', JSON.stringify(history));
     }
+
+    document.getElementById('historyButton').addEventListener('click', () => {
+        window.location.href = 'history.html';
+    });
 } 
