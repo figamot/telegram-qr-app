@@ -13,16 +13,18 @@ if (!window.Telegram.WebApp.initData) {
         const par = {
             text: "Наведите камеру на QR код"
         };
-        tg.showScanQrPopup(par);
+        window.Telegram.WebApp.showScanQrPopup(par, function(data) {
+            if (data) {
+                processQRCode(data);
+                window.Telegram.WebApp.closeScanQrPopup();
+            }
+        });
     }
 
     function processQRCode(data) {
         if (data === lastCode) {
             return;
         }
-        
-        // Закрываем окно сканера
-        tg.closeScanQrPopup();
         
         lastCode = data;
         lastScannedData = data;
