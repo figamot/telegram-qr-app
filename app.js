@@ -3,34 +3,25 @@ tg.expand();
 
 let lastScannedData = null;
 
-// Создаем обработчик события сканирования
-const qrEventHandler = (event) => {
-    // Получаем текст из объекта события
-    const qrData = event.data;
-    if (qrData) {
-        lastScannedData = qrData;
-        document.getElementById('result').textContent = `Отсканировано: ${qrData}`;
-        document.getElementById('sendButton').style.display = 'block';
-    }
-};
-
 document.getElementById('scanButton').addEventListener('click', () => {
-    // Добавляем обработчик события
-    tg.onEvent('qrTextReceived', qrEventHandler);
-    
-    // Открываем сканер QR кода
-    const par = {
-        text: "Сканируем QR код"
-    };
-    window.Telegram.WebApp.showScanQrPopup(par);
+    // Открываем сканер QR кода с callback функцией
+    window.Telegram.WebApp.showScanQrPopup({
+        text: "Сканируем QR код",
+        callback: function(text) {
+            console.log("Отсканированный текст:", text); // для отладки
+            if (text) {
+                lastScannedData = text;
+                document.getElementById('result').textContent = `Отсканировано: ${text}`;
+                document.getElementById('sendButton').style.display = 'block';
+            }
+        }
+    });
 });
 
 // Добавляем обработчик для кнопки отправки
 document.getElementById('sendButton').addEventListener('click', async () => {
     if (lastScannedData) {
         await sendToGoogleSheets(lastScannedData);
-        // Удаляем обработчик события после отправки
-        tg.offEvent('qrTextReceived', qrEventHandler);
     }
 });
 
