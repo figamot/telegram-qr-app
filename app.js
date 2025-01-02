@@ -4,7 +4,9 @@ tg.expand();
 let lastScannedData = null;
 
 // Создаем обработчик события сканирования
-const qrEventHandler = (qrData) => {
+const qrEventHandler = (event) => {
+    // Получаем текст из объекта события
+    const qrData = event.data;
     if (qrData) {
         lastScannedData = qrData;
         document.getElementById('result').textContent = `Отсканировано: ${qrData}`;
