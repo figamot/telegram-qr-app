@@ -21,6 +21,9 @@ if (!window.Telegram.WebApp.initData) {
             return;
         }
         
+        // Закрываем окно сканера
+        tg.closeScanQrPopup();
+        
         lastCode = data;
         lastScannedData = data;
         
