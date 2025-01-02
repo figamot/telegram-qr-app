@@ -1,20 +1,24 @@
 let tg = window.Telegram.WebApp;
 tg.expand();
 
-let lastScannedData = null; // Для хранения последнего отсканированного значения
+let lastScannedData = null;
 
 document.getElementById('scanButton').addEventListener('click', async () => {
     try {
-        const qrData = await tg.showScanQrPopup({
-            text: "Пожалуйста, отсканируйте QR код"
+        // Открываем сканер QR кода
+        tg.showScanQrPopup({
+            text: "Пожалуйста, отсканируйте QR код",
+            // Добавляем обработчик события успешного сканирования
+            callback: (data) => {
+                if (data) {
+                    // Сохраняем отсканированные данные
+                    lastScannedData = data;
+                    // Показываем результат и кнопку отправки
+                    document.getElementById('result').textContent = `Отсканировано: ${data}`;
+                    document.getElementById('sendButton').style.display = 'block';
+                }
+            }
         });
-
-        // Сохраняем отсканированные данные
-        lastScannedData = qrData;
-
-        // Показываем результат и кнопку отправки
-        document.getElementById('result').textContent = `Отсканировано: ${qrData}`;
-        document.getElementById('sendButton').style.display = 'block';
 
     } catch (error) {
         document.getElementById('result').textContent = `Ошибка: ${error.message}`;
