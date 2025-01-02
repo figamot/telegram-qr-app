@@ -38,7 +38,6 @@ if (!window.Telegram.WebApp.initData) {
 
     // Добавим функцию для логирования
     function debugLog(message, data = null) {
-        const logElement = document.getElementById('debug-log');
         const timestamp = new Date().toISOString();
         let logMessage = `${timestamp}: ${message}`;
         
@@ -46,7 +45,10 @@ if (!window.Telegram.WebApp.initData) {
             logMessage += '\n' + JSON.stringify(data, null, 2);
         }
         
-        logElement.innerHTML += logMessage + '\n\n';
+        // Сохраняем логи в localStorage
+        const currentLogs = localStorage.getItem('debug_logs') || '';
+        localStorage.setItem('debug_logs', logMessage + '\n\n' + currentLogs);
+        
         console.log(message, data);
     }
 
@@ -82,4 +84,9 @@ if (!window.Telegram.WebApp.initData) {
             document.getElementById('result').textContent += `\nОшибка при сохранении данных: ${error.message}`;
         }
     }
+
+    // Добавляем обработчик для кнопки логов
+    document.getElementById('logsButton').addEventListener('click', () => {
+        window.location.href = 'logs.html';
+    });
 } 
