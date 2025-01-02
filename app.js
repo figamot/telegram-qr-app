@@ -13,32 +13,21 @@ if (!window.Telegram.WebApp.initData) {
         const par = {
             text: "Наведите камеру на QR код"
         };
-        window.Telegram.WebApp.showScanQrPopup(par, function(data) {
+        tg.showScanQrPopup(par, function(data) {
             if (data) {
-                processQRCode(data);
-                window.Telegram.WebApp.closeScanQrPopup();
+                if (data !== lastCode) {
+                    lastCode = data;
+                    lastScannedData = data;
+                    document.getElementById('result').textContent = `Отсканировано: ${data}`;
+                    document.getElementById('sendButton').style.display = 'block';
+                }
+                tg.closeScanQrPopup();
             }
         });
     }
 
-    function processQRCode(data) {
-        if (data === lastCode) {
-            return;
-        }
-        
-        lastCode = data;
-        lastScannedData = data;
-        
-        document.getElementById('result').textContent = `Отсканировано: ${data}`;
-        document.getElementById('sendButton').style.display = 'block';
-    }
-
     document.getElementById('scanButton').addEventListener('click', () => {
         showQRScanner();
-    });
-
-    tg.onEvent('qrTextReceived', (event) => {
-        processQRCode(event.data);
     });
 
     document.getElementById('sendButton').addEventListener('click', async () => {
