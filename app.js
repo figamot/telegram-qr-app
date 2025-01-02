@@ -6,20 +6,17 @@ let lastScannedData = null;
 document.getElementById('scanButton').addEventListener('click', () => {
     // Открываем сканер QR кода
     tg.showScanQrPopup({
-        text: "Пожалуйста, отсканируйте QR код"
-    }).then((result) => {
-        // Закрываем окно сканера
-        tg.closeScanQrPopup();
-        
-        if (result) {
-            lastScannedData = result;
-            document.getElementById('result').textContent = `Отсканировано: ${result}`;
-            document.getElementById('sendButton').style.display = 'block';
+        text: "Пожалуйста, отсканируйте QR код",
+        eventHandler: (qrData) => {
+            // Обработчик события сканирования
+            if (qrData) {
+                lastScannedData = qrData;
+                document.getElementById('result').textContent = `Отсканировано: ${qrData}`;
+                document.getElementById('sendButton').style.display = 'block';
+                // Закрываем сканер
+                tg.closeScanQrPopup();
+            }
         }
-    }).catch((error) => {
-        // Закрываем окно сканера в случае ошибки
-        tg.closeScanQrPopup();
-        document.getElementById('result').textContent = `Ошибка: ${error.message}`;
     });
 });
 
