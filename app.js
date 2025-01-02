@@ -7,18 +7,20 @@ document.getElementById('scanButton').addEventListener('click', async () => {
         const audio = new Audio();
         audio.src = 'data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU' + 'A'.repeat(1024);
 
-        // Используем встроенный сканер QR кодов Telegram с коллбэком
+        // Используем встроенный сканер QR кодов Telegram
         const qrData = await tg.showScanQrPopup({
-            text: "Пожалуйста, отсканируйте QR код",
-            onScan: () => {
-                // Вибрация при успешном сканировании
-                if (navigator.vibrate) {
-                    navigator.vibrate([200, 100, 200]); // Двойная вибрация
-                }
-                // Воспроизводим звук
-                audio.play().catch(console.error);
-            }
+            text: "Пожалуйста, отсканируйте QR код"
         });
+
+        // После успешного сканирования
+        if (qrData) {
+            // Вибрация
+            if (navigator.vibrate) {
+                navigator.vibrate([200, 100, 200]); // Двойная вибрация
+            }
+            // Звук
+            audio.play().catch(console.error);
+        }
 
         // Показываем результат на странице
         document.getElementById('result').textContent = `Отсканировано: ${qrData}`;
