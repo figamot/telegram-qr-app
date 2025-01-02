@@ -36,16 +36,29 @@ if (!window.Telegram.WebApp.initData) {
         }
     });
 
-    // Добавим функцию для логирования
+    // Добавим функцию форматирования даты
+    function formatDate(date) {
+        const pad = (num) => String(num).padStart(2, '0');
+        
+        const year = date.getFullYear();
+        const month = pad(date.getMonth() + 1);
+        const day = pad(date.getDate());
+        const hours = pad(date.getHours());
+        const minutes = pad(date.getMinutes());
+        const seconds = pad(date.getSeconds());
+        
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+
+    // Изменим функцию логирования
     function debugLog(message, data = null) {
-        const timestamp = new Date().toISOString();
+        const timestamp = formatDate(new Date());
         let logMessage = `${timestamp}: ${message}`;
         
         if (data) {
             logMessage += '\n' + JSON.stringify(data, null, 2);
         }
         
-        // Сохраняем логи в localStorage
         const currentLogs = localStorage.getItem('debug_logs') || '';
         localStorage.setItem('debug_logs', logMessage + '\n\n' + currentLogs);
         
@@ -54,12 +67,11 @@ if (!window.Telegram.WebApp.initData) {
 
     // И изменим функцию отправки данных
     async function sendToGoogleSheets(qrData) {
-        const timestamp = new Date().toISOString();
+        const timestamp = formatDate(new Date());
         
         try {
             debugLog('Отправляем данные:', { timestamp, qrData });
 
-            // Обновляем URL на новый
             const url = new URL('https://script.google.com/macros/s/AKfycbwaLIpSc9zKq5B7Bg9QMGmdK0SA_5ulYfOexpNc0k5RR40zH9T72sAb-LXA0-AH2A5Wew/exec');
             url.searchParams.append('timestamp', timestamp);
             url.searchParams.append('qrData', qrData);
