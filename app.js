@@ -63,8 +63,8 @@ if (!window.Telegram.WebApp.initData) {
         try {
             debugLog('Отправляем данные:', { timestamp, qrData });
 
-            // Создаем URL с параметрами
-            const url = new URL('https://script.google.com/macros/s/AKfycbxUgLE5muX-TbMrKuKtNXK8w6riuKv8cNFI4llZCxUaxfyYzP5TZ2zBO2cLTzAquBf9MA/exec');
+            // Обновляем URL на новый
+            const url = new URL('https://script.google.com/macros/s/AKfycbwaLIpSc9zKq5B7Bg9QMGmdK0SA_5ulYfOexpNc0k5RR40zH9T72sAb-LXA0-AH2A5Wew/exec');
             url.searchParams.append('timestamp', timestamp);
             url.searchParams.append('qrData', qrData);
 
@@ -74,7 +74,7 @@ if (!window.Telegram.WebApp.initData) {
             });
 
             debugLog('Ответ сервера получен');
-
+            
             document.getElementById('result').textContent += '\nДанные отправлены!';
             document.getElementById('sendButton').style.display = 'none';
             lastScannedData = null;
