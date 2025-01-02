@@ -27,18 +27,19 @@
             border-radius: 5px;
             cursor: pointer;
         }
+        #logsButton {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px;
+            background-color: #757575;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
         #result {
             margin-top: 20px;
-        }
-        #debug-log {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f5f5f5;
-            border: 1px solid #ddd;
-            font-family: monospace;
-            font-size: 12px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
         }
     </style>
 </head>
@@ -47,9 +48,8 @@
         <button id="scanButton">Сканировать QR код</button>
         <div id="result"></div>
         <button id="sendButton">Отправить в таблицу</button>
-        <div id="debug-log"></div>
+        <button id="logsButton">Логи</button>
     </div>
-
     <script src="app.js"></script>
 </body>
 </html> 
