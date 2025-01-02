@@ -3,26 +3,19 @@ tg.expand();
 
 let lastScannedData = null;
 
-document.getElementById('scanButton').addEventListener('click', async () => {
-    try {
-        // Открываем сканер QR кода
-        tg.showScanQrPopup({
-            text: "Пожалуйста, отсканируйте QR код",
-            // Добавляем обработчик события успешного сканирования
-            callback: (data) => {
-                if (data) {
-                    // Сохраняем отсканированные данные
-                    lastScannedData = data;
-                    // Показываем результат и кнопку отправки
-                    document.getElementById('result').textContent = `Отсканировано: ${data}`;
-                    document.getElementById('sendButton').style.display = 'block';
-                }
-            }
-        });
-
-    } catch (error) {
+document.getElementById('scanButton').addEventListener('click', () => {
+    // Открываем сканер QR кода
+    tg.showScanQrPopup({
+        text: "Пожалуйста, отсканируйте QR код"
+    }).then((result) => {
+        if (result) {
+            lastScannedData = result;
+            document.getElementById('result').textContent = `Отсканировано: ${result}`;
+            document.getElementById('sendButton').style.display = 'block';
+        }
+    }).catch((error) => {
         document.getElementById('result').textContent = `Ошибка: ${error.message}`;
-    }
+    });
 });
 
 // Добавляем обработчик для кнопки отправки
@@ -52,8 +45,8 @@ async function sendToGoogleSheets(qrData) {
         }
 
         document.getElementById('result').textContent += '\nДанные успешно сохранены!';
-        document.getElementById('sendButton').style.display = 'none'; // Скрываем кнопку после отправки
-        lastScannedData = null; // Очищаем сохраненные данные
+        document.getElementById('sendButton').style.display = 'none';
+        lastScannedData = null;
     } catch (error) {
         document.getElementById('result').textContent += '\nОшибка при сохранении данных';
         console.error('Error:', error);
