@@ -17,9 +17,10 @@ document.getElementById('scanButton').addEventListener('click', () => {
     tg.onEvent('qrTextReceived', qrEventHandler);
     
     // Открываем сканер QR кода
-    tg.showScanQrPopup({
-        'text': 'Сканируем QR код'
-    });
+    const par = {
+        text: "Сканируем QR код"
+    };
+    window.Telegram.WebApp.showScanQrPopup(par);
 });
 
 // Добавляем обработчик для кнопки отправки
