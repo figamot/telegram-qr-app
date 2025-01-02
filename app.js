@@ -8,12 +8,17 @@ document.getElementById('scanButton').addEventListener('click', () => {
     tg.showScanQrPopup({
         text: "Пожалуйста, отсканируйте QR код"
     }).then((result) => {
+        // Закрываем окно сканера
+        tg.closeScanQrPopup();
+        
         if (result) {
             lastScannedData = result;
             document.getElementById('result').textContent = `Отсканировано: ${result}`;
             document.getElementById('sendButton').style.display = 'block';
         }
     }).catch((error) => {
+        // Закрываем окно сканера в случае ошибки
+        tg.closeScanQrPopup();
         document.getElementById('result').textContent = `Ошибка: ${error.message}`;
     });
 });
