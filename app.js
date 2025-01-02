@@ -63,36 +63,23 @@ if (!window.Telegram.WebApp.initData) {
         try {
             debugLog('Отправляем данные:', { timestamp, qrData });
 
-            const response = await fetch('https://script.google.com/macros/s/AKfycbwtade14oC_eU7tmCxea1dtus_4J7HsEgf9SEwv5_FmjACMKrz5eFhjkoa3tLi4XKz6lQ/exec', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                mode: 'cors',
-                body: JSON.stringify({
-                    timestamp: timestamp,
-                    qrData: qrData
-                })
+            // Создаем URL с параметрами
+            const url = new URL('https://script.google.com/macros/s/AKfycbxUgLE5muX-TbMrKuKtNXK8w6riuKv8cNFI4llZCxUaxfyYzP5TZ2zBO2cLTzAquBf9MA/exec');
+            url.searchParams.append('timestamp', timestamp);
+            url.searchParams.append('qrData', qrData);
+
+            const response = await fetch(url.toString(), {
+                method: 'GET',
+                mode: 'no-cors'
             });
 
-            debugLog('Ответ сервера:', {
-                status: response.status,
-                statusText: response.statusText,
-                headers: Object.fromEntries(response.headers.entries())
-            });
+            debugLog('Ответ сервера получен');
 
-            const responseData = await response.text();
-            debugLog('Данные ответа:', responseData);
-
-            if (!response.ok) {
-                throw new Error(`Ошибка при отправке данных: ${response.status} ${responseData}`);
-            }
-
-            document.getElementById('result').textContent += '\nДанные успешно сохранены!';
+            document.getElementById('result').textContent += '\nДанные отправлены!';
             document.getElementById('sendButton').style.display = 'none';
             lastScannedData = null;
             lastCode = null;
+
         } catch (error) {
             debugLog('Ошибка:', {
                 message: error.message,
