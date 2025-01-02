@@ -18,6 +18,8 @@ if (!window.Telegram.WebApp.initData) {
                 if (data !== lastCode) {
                     lastCode = data;
                     lastScannedData = data;
+                    const timestamp = formatDate(new Date());
+                    saveToHistory(data, timestamp);
                     document.getElementById('result').textContent = `Отсканировано: ${data}`;
                     document.getElementById('sendButton').style.display = 'block';
                 }
@@ -101,4 +103,11 @@ if (!window.Telegram.WebApp.initData) {
     document.getElementById('logsButton').addEventListener('click', () => {
         window.location.href = 'logs.html';
     });
+
+    // Добавим функцию сохранения в историю
+    function saveToHistory(qrData, timestamp) {
+        const history = JSON.parse(localStorage.getItem('scan_history') || '[]');
+        history.push({ qrData, timestamp });
+        localStorage.setItem('scan_history', JSON.stringify(history));
+    }
 } 
