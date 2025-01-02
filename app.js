@@ -23,7 +23,7 @@ async function sendToGoogleSheets(qrData) {
     const timestamp = new Date().toISOString();
     
     try {
-        const response = await fetch('https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec', {
+        const response = await fetch('https://script.google.com/macros/s/AKfycbyaloAzdL41OkJa6AxM0p-AywpFTkSXvJgZAkcG7tCglMJ0E9KDPadMbMu0BQuZ1jajTg/exec', {
             method: 'POST',
             body: JSON.stringify({
                 timestamp: timestamp,
