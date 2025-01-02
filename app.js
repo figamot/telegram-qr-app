@@ -2,23 +2,42 @@ let tg = window.Telegram.WebApp;
 tg.expand();
 
 let lastScannedData = null;
+let lastCode = null; // для предотвращения повторного сканирования
 
+// Функция для показа QR сканера
+function showQRScanner() {
+    const par = {
+        text: "Наведите камеру на QR код"
+    };
+    tg.showScanQrPopup(par);
+}
+
+// Функция обработки QR кода
+function processQRCode(data) {
+    // Проверяем, не тот же это код
+    if (data === lastCode) {
+        return;
+    }
+    
+    lastCode = data;
+    lastScannedData = data;
+    
+    // Показываем результат
+    document.getElementById('result').textContent = `Отсканировано: ${data}`;
+    document.getElementById('sendButton').style.display = 'block';
+}
+
+// Обработчик кнопки сканирования
 document.getElementById('scanButton').addEventListener('click', () => {
-    // Открываем сканер QR кода с callback функцией
-    window.Telegram.WebApp.showScanQrPopup({
-        text: "Сканируем QR код",
-        callback: function(text) {
-            console.log("Отсканированный текст:", text); // для отладки
-            if (text) {
-                lastScannedData = text;
-                document.getElementById('result').textContent = `Отсканировано: ${text}`;
-                document.getElementById('sendButton').style.display = 'block';
-            }
-        }
-    });
+    showQRScanner();
 });
 
-// Добавляем обработчик для кнопки отправки
+// Добавляем обработчик события сканирования
+tg.onEvent('qrTextReceived', (event) => {
+    processQRCode(event.data);
+});
+
+// Обработчик кнопки отправки
 document.getElementById('sendButton').addEventListener('click', async () => {
     if (lastScannedData) {
         await sendToGoogleSheets(lastScannedData);
@@ -47,6 +66,7 @@ async function sendToGoogleSheets(qrData) {
         document.getElementById('result').textContent += '\nДанные успешно сохранены!';
         document.getElementById('sendButton').style.display = 'none';
         lastScannedData = null;
+        lastCode = null;
     } catch (error) {
         document.getElementById('result').textContent += '\nОшибка при сохранении данных';
         console.error('Error:', error);
