@@ -4,13 +4,41 @@
     <title>QR Scanner Mini App</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        .container {
+            padding: 20px;
+            text-align: center;
+        }
+        #sendButton {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #scanButton {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <button id="scanButton">Сканировать QR код</button>
         <div id="result"></div>
+        <button id="sendButton">Отправить в таблицу</button>
     </div>
 
     <script src="app.js"></script>
 </body>
-</html>  
+</html> 
