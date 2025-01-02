@@ -3,20 +3,22 @@ tg.expand();
 
 let lastScannedData = null;
 
+// Создаем обработчик события сканирования
+const qrEventHandler = (qrData) => {
+    if (qrData) {
+        lastScannedData = qrData;
+        document.getElementById('result').textContent = `Отсканировано: ${qrData}`;
+        document.getElementById('sendButton').style.display = 'block';
+    }
+};
+
 document.getElementById('scanButton').addEventListener('click', () => {
+    // Добавляем обработчик события
+    tg.onEvent('qrTextReceived', qrEventHandler);
+    
     // Открываем сканер QR кода
     tg.showScanQrPopup({
-        text: "Пожалуйста, отсканируйте QR код",
-        eventHandler: (qrData) => {
-            // Обработчик события сканирования
-            if (qrData) {
-                lastScannedData = qrData;
-                document.getElementById('result').textContent = `Отсканировано: ${qrData}`;
-                document.getElementById('sendButton').style.display = 'block';
-                // Закрываем сканер
-                tg.closeScanQrPopup();
-            }
-        }
+        'text': 'Сканируем QR код'
     });
 });
 
@@ -24,6 +26,8 @@ document.getElementById('scanButton').addEventListener('click', () => {
 document.getElementById('sendButton').addEventListener('click', async () => {
     if (lastScannedData) {
         await sendToGoogleSheets(lastScannedData);
+        // Удаляем обработчик события после отправки
+        tg.offEvent('qrTextReceived', qrEventHandler);
     }
 });
 
