@@ -22,7 +22,7 @@ async function sendToGoogleSheets(qrData) {
     const timestamp = new Date().toISOString();
     
     try {
-        const response = await fetch('https://script.google.com/macros/s/AKfycbyaloAzdL41OkJa6AxM0p-AywpFTkSXvJgZAkcG7tCglMJ0E9KDPadMbMu0BQuZ1jajTg/exec', {
+        const response = await fetch('https://script.google.com/macros/s/AKfycbwtade14oC_eU7tmCxea1dtus_4J7HsEgf9SEwv5_FmjACMKrz5eFhjkoa3tLi4XKz6lQ/exec', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
