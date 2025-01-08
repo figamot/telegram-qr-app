@@ -52,6 +52,11 @@
             margin-bottom: 20px;
             cursor: pointer;
         }
+        .history-user {
+            color: #95a5a6;
+            margin-top: 5px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -98,6 +103,7 @@
                                     <div class="history-time">${time}</div>
                                     <div class="history-data">${item.qrData}</div>
                                     <div class="history-quantity">Количество: ${item.quantity}</div>
+                                    <div class="history-user">Пользователь: ${item.userName}</div>
                                 </div>
                             `;
                         }).join('')}
