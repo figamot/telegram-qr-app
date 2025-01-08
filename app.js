@@ -19,7 +19,6 @@ if (!window.Telegram.WebApp.initData) {
                     lastCode = data;
                     lastScannedData = data;
                     const timestamp = formatDate(new Date());
-                    saveToHistory(data, timestamp);
                     
                     // Показываем результат и поле для ввода количества
                     document.getElementById('result').innerHTML = `
@@ -29,10 +28,13 @@ if (!window.Telegram.WebApp.initData) {
                                 style="background: #242f3d; border: 1px solid #3498db; 
                                 color: white; padding: 8px; border-radius: 5px; width: 100px; 
                                 text-align: center;" 
-                                placeholder="Количество">
+                                placeholder="Количество"
+                                min="1"
+                                onchange="checkQuantity(this.value)">
                         </div>
                     `;
-                    document.getElementById('sendButton').style.display = 'block';
+                    // Кнопка отправки скрыта по умолчанию
+                    document.getElementById('sendButton').style.display = 'none';
                 }
                 tg.closeScanQrPopup();
             }
@@ -78,10 +80,27 @@ if (!window.Telegram.WebApp.initData) {
         console.log(message, data);
     }
 
-    // И изменим функцию отправки данных
+    // Добавим функцию проверки количества
+    function checkQuantity(value) {
+        const sendButton = document.getElementById('sendButton');
+        if (value && parseInt(value) > 0) {
+            sendButton.style.display = 'block';
+        } else {
+            sendButton.style.display = 'none';
+        }
+    }
+
+    // Изменим функцию отправки данных
     async function sendToGoogleSheets(qrData) {
+        const quantity = document.getElementById('quantityInput').value;
+        
+        // Проверяем наличие количества
+        if (!quantity || parseInt(quantity) <= 0) {
+            document.getElementById('result').textContent += '\nВведите количество!';
+            return;
+        }
+
         const timestamp = formatDate(new Date());
-        const quantity = document.getElementById('quantityInput').value || '1';
         
         try {
             debugLog('Отправляем данные:', { timestamp, qrData, quantity });
@@ -117,12 +136,14 @@ if (!window.Telegram.WebApp.initData) {
         window.location.href = 'logs.html';
     });
 
-    // Добавим функцию сохранения в историю
+    // Изменим функцию сохранения в историю
     function saveToHistory(qrData, timestamp) {
-        const quantity = document.getElementById('quantityInput')?.value || '1';
-        const history = JSON.parse(localStorage.getItem('scan_history') || '[]');
-        history.push({ qrData, timestamp, quantity });
-        localStorage.setItem('scan_history', JSON.stringify(history));
+        const quantity = document.getElementById('quantityInput')?.value;
+        if (quantity && parseInt(quantity) > 0) {
+            const history = JSON.parse(localStorage.getItem('scan_history') || '[]');
+            history.push({ qrData, timestamp, quantity });
+            localStorage.setItem('scan_history', JSON.stringify(history));
+        }
     }
 
     document.getElementById('historyButton').addEventListener('click', () => {
