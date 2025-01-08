@@ -11,11 +11,16 @@ if (!window.Telegram.WebApp.initData) {
     let dataSent = false;
     let isProcessing = false;
 
+    // Получаем данные пользователя из Telegram
+    const user = tg.initDataUnsafe?.user || {};
+    const userName = user.username || user.first_name || 'Unknown';
+    debugLog('Данные пользователя:', user);
+
     // Очищаем все обработчики MainButton
     tg.MainButton.offClick();
     tg.MainButton.hide();
 
-    // Создаем один обработчик для отправки данных
+    // Обновляем обработчик отправки данных
     const sendDataHandler = async () => {
         if (isProcessing || dataSent || !lastScannedData) return;
 
@@ -32,12 +37,13 @@ if (!window.Telegram.WebApp.initData) {
             tg.MainButton.disable();
             
             const timestamp = formatDate(new Date());
-            debugLog('Начало отправки данных:', { timestamp, lastScannedData, quantity });
+            debugLog('Начало отправки данных:', { timestamp, lastScannedData, quantity, userName });
 
-            const url = new URL('https://script.google.com/macros/s/AKfycbwzqhUYemEJ7c5CqWFdXigckQUvP7g167U8Fl25VU4ruJXZ5LKX_gj4rWN29RxjI9UvCg/exec');
+            const url = new URL('https://script.google.com/macros/s/AKfycbzMB5fY5BI1BdrA8AbCyWfxmvS-Bu6x2CDtD3ACASO3JDqV1BhK8dPsyt-rb9JCgbeBQg/exec');
             url.searchParams.append('timestamp', timestamp);
             url.searchParams.append('qrData', lastScannedData);
             url.searchParams.append('quantity', quantity);
+            url.searchParams.append('userName', userName); // Добавляем имя пользователя
 
             const response = await fetch(url.toString(), {
                 method: 'GET',
@@ -46,8 +52,8 @@ if (!window.Telegram.WebApp.initData) {
 
             debugLog('Данные успешно отправлены');
             
-            // Сохраняем в историю с явным указанием количества
-            saveToHistory(lastScannedData, timestamp, parseInt(quantity));
+            // Сохраняем в историю с именем пользователя
+            saveToHistory(lastScannedData, timestamp, parseInt(quantity), userName);
             
             // Очищаем состояние
             dataSent = true;
@@ -65,6 +71,25 @@ if (!window.Telegram.WebApp.initData) {
             tg.MainButton.enable();
         }
     };
+
+    // Обновляем функцию сохранения в историю
+    function saveToHistory(qrData, timestamp, quantity, userName) {
+        debugLog('Сохранение в историю:', { qrData, timestamp, quantity, userName });
+        
+        try {
+            const history = JSON.parse(localStorage.getItem('scan_history') || '[]');
+            history.unshift({ 
+                qrData: qrData,
+                timestamp: timestamp,
+                quantity: quantity,
+                userName: userName
+            });
+            localStorage.setItem('scan_history', JSON.stringify(history));
+            debugLog('История успешно обновлена');
+        } catch (error) {
+            debugLog('Ошибка при сохранении в историю:', error);
+        }
+    }
 
     // Устанавливаем обработчик один раз
     tg.MainButton.onClick(sendDataHandler);
@@ -148,24 +173,6 @@ if (!window.Telegram.WebApp.initData) {
     document.getElementById('logsButton').addEventListener('click', () => {
         window.location.href = 'logs.html';
     });
-
-    // Обновим функцию сохранения в историю
-    function saveToHistory(qrData, timestamp, quantity) {
-        debugLog('Сохранение в историю:', { qrData, timestamp, quantity });
-        
-        try {
-            const history = JSON.parse(localStorage.getItem('scan_history') || '[]');
-            history.unshift({ 
-                qrData: qrData,
-                timestamp: timestamp,
-                quantity: quantity // Убедимся, что количество сохраняется
-            });
-            localStorage.setItem('scan_history', JSON.stringify(history));
-            debugLog('История успешно обновлена');
-        } catch (error) {
-            debugLog('Ошибка при сохранении в историю:', error);
-        }
-    }
 
     document.getElementById('scanButton').addEventListener('click', showQRScanner);
     document.getElementById('historyButton').addEventListener('click', () => {
