@@ -30,6 +30,7 @@ if (!window.Telegram.WebApp.initData) {
                                 text-align: center;" 
                                 placeholder="Количество"
                                 min="1"
+                                oninput="checkQuantity(this.value)"
                                 onchange="checkQuantity(this.value)">
                         </div>
                     `;
@@ -80,10 +81,10 @@ if (!window.Telegram.WebApp.initData) {
         console.log(message, data);
     }
 
-    // Добавим функцию проверки количества
+    // Изменим функцию проверки количества
     function checkQuantity(value) {
         const sendButton = document.getElementById('sendButton');
-        if (value && parseInt(value) > 0) {
+        if (value && value.trim() !== '' && parseInt(value) > 0) {
             sendButton.style.display = 'block';
         } else {
             sendButton.style.display = 'none';
@@ -92,11 +93,12 @@ if (!window.Telegram.WebApp.initData) {
 
     // Изменим функцию отправки данных
     async function sendToGoogleSheets(qrData) {
-        const quantity = document.getElementById('quantityInput').value;
+        const quantityInput = document.getElementById('quantityInput');
+        const quantity = quantityInput?.value;
         
-        // Проверяем наличие количества
-        if (!quantity || parseInt(quantity) <= 0) {
-            document.getElementById('result').textContent += '\nВведите количество!';
+        // Усиленная проверка количества
+        if (!quantity || quantity.trim() === '' || parseInt(quantity) <= 0) {
+            document.getElementById('result').textContent = 'Введите количество!';
             return;
         }
 
@@ -117,7 +119,7 @@ if (!window.Telegram.WebApp.initData) {
 
             debugLog('Ответ сервера получен');
             
-            document.getElementById('result').textContent += '\nДанные отправлены!';
+            document.getElementById('result').textContent = 'Данные отправлены!';
             document.getElementById('sendButton').style.display = 'none';
             lastScannedData = null;
             lastCode = null;
@@ -127,7 +129,7 @@ if (!window.Telegram.WebApp.initData) {
                 message: error.message,
                 stack: error.stack
             });
-            document.getElementById('result').textContent += `\nОшибка при сохранении данных: ${error.message}`;
+            document.getElementById('result').textContent = `Ошибка при сохранении данных: ${error.message}`;
         }
     }
 
