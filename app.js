@@ -20,7 +20,18 @@ if (!window.Telegram.WebApp.initData) {
                     lastScannedData = data;
                     const timestamp = formatDate(new Date());
                     saveToHistory(data, timestamp);
-                    document.getElementById('result').textContent = `Отсканировано: ${data}`;
+                    
+                    // Показываем результат и поле для ввода количества
+                    document.getElementById('result').innerHTML = `
+                        <div>Отсканировано: ${data}</div>
+                        <div style="margin-top: 15px;">
+                            <input type="number" id="quantityInput" 
+                                style="background: #242f3d; border: 1px solid #3498db; 
+                                color: white; padding: 8px; border-radius: 5px; width: 100px; 
+                                text-align: center;" 
+                                placeholder="Количество">
+                        </div>
+                    `;
                     document.getElementById('sendButton').style.display = 'block';
                 }
                 tg.closeScanQrPopup();
@@ -70,13 +81,15 @@ if (!window.Telegram.WebApp.initData) {
     // И изменим функцию отправки данных
     async function sendToGoogleSheets(qrData) {
         const timestamp = formatDate(new Date());
+        const quantity = document.getElementById('quantityInput').value || '1';
         
         try {
-            debugLog('Отправляем данные:', { timestamp, qrData });
+            debugLog('Отправляем данные:', { timestamp, qrData, quantity });
 
-            const url = new URL('https://script.google.com/macros/s/AKfycbwaLIpSc9zKq5B7Bg9QMGmdK0SA_5ulYfOexpNc0k5RR40zH9T72sAb-LXA0-AH2A5Wew/exec');
+            const url = new URL('https://script.google.com/macros/s/AKfycbwzqhUYemEJ7c5CqWFdXigckQUvP7g167U8Fl25VU4ruJXZ5LKX_gj4rWN29RxjI9UvCg/exec');
             url.searchParams.append('timestamp', timestamp);
             url.searchParams.append('qrData', qrData);
+            url.searchParams.append('quantity', quantity);
 
             const response = await fetch(url.toString(), {
                 method: 'GET',
@@ -106,8 +119,9 @@ if (!window.Telegram.WebApp.initData) {
 
     // Добавим функцию сохранения в историю
     function saveToHistory(qrData, timestamp) {
+        const quantity = document.getElementById('quantityInput')?.value || '1';
         const history = JSON.parse(localStorage.getItem('scan_history') || '[]');
-        history.push({ qrData, timestamp });
+        history.push({ qrData, timestamp, quantity });
         localStorage.setItem('scan_history', JSON.stringify(history));
     }
 
