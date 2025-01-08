@@ -9,68 +9,111 @@ if (!window.Telegram.WebApp.initData) {
     let lastScannedData = null;
     let lastCode = null;
     let dataSent = false;
-    let isSending = false; // Флаг для блокировки повторной отправки во время запроса
+    let isProcessing = false;
 
-    // Удаляем предыдущий обработчик MainButton при инициализации
+    // Очищаем все обработчики MainButton
     tg.MainButton.offClick();
+    tg.MainButton.hide();
+
+    // Создаем один обработчик для отправки данных
+    const sendDataHandler = async () => {
+        if (isProcessing || dataSent || !lastScannedData) return;
+
+        const quantityInput = document.getElementById('quantityInput');
+        const quantity = quantityInput?.value;
+        
+        if (!quantity || quantity.trim() === '' || parseInt(quantity) <= 0) {
+            document.getElementById('result').textContent = 'Введите количество!';
+            return;
+        }
+
+        try {
+            isProcessing = true;
+            tg.MainButton.disable();
+            
+            const timestamp = formatDate(new Date());
+            debugLog('Начало отправки данных:', { timestamp, lastScannedData, quantity });
+
+            const url = new URL('https://script.google.com/macros/s/AKfycbwzqhUYemEJ7c5CqWFdXigckQUvP7g167U8Fl25VU4ruJXZ5LKX_gj4rWN29RxjI9UvCg/exec');
+            url.searchParams.append('timestamp', timestamp);
+            url.searchParams.append('qrData', lastScannedData);
+            url.searchParams.append('quantity', quantity);
+
+            const response = await fetch(url.toString(), {
+                method: 'GET',
+                mode: 'no-cors'
+            });
+
+            debugLog('Данные успешно отправлены');
+            
+            // Сохраняем в историю
+            saveToHistory(lastScannedData, timestamp, quantity);
+            
+            // Очищаем состояние
+            dataSent = true;
+            lastScannedData = null;
+            lastCode = null;
+            
+            document.getElementById('result').textContent = 'Данные отправлены! Отсканируйте новый QR-код.';
+            tg.MainButton.hide();
+
+        } catch (error) {
+            debugLog('Ошибка при отправке:', error);
+            document.getElementById('result').textContent = 'Ошибка при отправке данных. Попробуйте еще раз.';
+        } finally {
+            isProcessing = false;
+            tg.MainButton.enable();
+        }
+    };
+
+    // Устанавливаем обработчик один раз
+    tg.MainButton.onClick(sendDataHandler);
 
     function showQRScanner() {
+        // Сбрасываем состояние
         dataSent = false;
-        isSending = false;
+        isProcessing = false;
+        lastScannedData = null;
+        lastCode = null;
+        
         tg.MainButton.hide();
         
         const par = {
             text: "Наведите камеру на QR код"
         };
+        
         tg.showScanQrPopup(par, function(data) {
             if (data) {
-                if (data !== lastCode) {
-                    lastCode = data;
-                    lastScannedData = data;
-                    const timestamp = formatDate(new Date());
-                    
-                    document.getElementById('result').innerHTML = `
-                        <div>Отсканировано: ${data}</div>
-                        <div style="margin-top: 15px;">
-                            <input type="number" id="quantityInput" 
-                                style="background: #242f3d; border: 1px solid #3498db; 
-                                color: white; padding: 8px; border-radius: 5px; width: 100px; 
-                                text-align: center;" 
-                                placeholder="Количество"
-                                min="1"
-                                oninput="checkQuantity(this.value)"
-                                onchange="checkQuantity(this.value)">
-                        </div>
-                    `;
-                }
+                lastScannedData = data;
+                lastCode = data;
+                
+                document.getElementById('result').innerHTML = `
+                    <div>Отсканировано: ${data}</div>
+                    <div style="margin-top: 15px;">
+                        <input type="number" id="quantityInput" 
+                            style="background: #242f3d; border: 1px solid #3498db; 
+                            color: white; padding: 8px; border-radius: 5px; width: 100px; 
+                            text-align: center;" 
+                            placeholder="Количество"
+                            min="1"
+                            oninput="checkQuantity(this.value)"
+                            onchange="checkQuantity(this.value)">
+                    </div>
+                `;
+                
                 tg.closeScanQrPopup();
             }
         });
     }
 
-    // Устанавливаем один обработчик для MainButton
-    tg.MainButton.onClick(async () => {
-        if (lastScannedData && !dataSent && !isSending) {
-            isSending = true; // Блокируем повторную отправку
-            tg.MainButton.disable(); // Делаем кнопку неактивной
-            await sendToGoogleSheets(lastScannedData);
-            tg.MainButton.enable(); // Возвращаем активность кнопке
-        }
-    });
-
     function checkQuantity(value) {
-        if (value && value.trim() !== '' && parseInt(value) > 0 && !dataSent && !isSending) {
+        if (!isProcessing && !dataSent && value && value.trim() !== '' && parseInt(value) > 0) {
             tg.MainButton.text = "Отправить";
             tg.MainButton.show();
         } else {
             tg.MainButton.hide();
         }
     }
-
-    // Удаляем обработчик для sendButton, так как теперь используем только MainButton
-    document.getElementById('scanButton').addEventListener('click', () => {
-        showQRScanner();
-    });
 
     // Добавим функцию форматирования даты
     function formatDate(date) {
@@ -101,62 +144,6 @@ if (!window.Telegram.WebApp.initData) {
         console.log(message, data);
     }
 
-    // Изменим функцию отправки данных
-    async function sendToGoogleSheets(qrData) {
-        if (dataSent || isSending) {
-            document.getElementById('result').textContent = 'Данные уже были отправлены или отправляются. Отсканируйте новый QR-код.';
-            tg.MainButton.hide();
-            return;
-        }
-
-        const quantityInput = document.getElementById('quantityInput');
-        const quantity = quantityInput?.value;
-        
-        if (!quantity || quantity.trim() === '' || parseInt(quantity) <= 0) {
-            document.getElementById('result').textContent = 'Введите количество!';
-            isSending = false;
-            return;
-        }
-
-        const timestamp = formatDate(new Date());
-        
-        try {
-            debugLog('Отправляем данные:', { timestamp, qrData, quantity });
-
-            const url = new URL('https://script.google.com/macros/s/AKfycbwzqhUYemEJ7c5CqWFdXigckQUvP7g167U8Fl25VU4ruJXZ5LKX_gj4rWN29RxjI9UvCg/exec');
-            url.searchParams.append('timestamp', timestamp);
-            url.searchParams.append('qrData', qrData);
-            url.searchParams.append('quantity', quantity);
-
-            const response = await fetch(url.toString(), {
-                method: 'GET',
-                mode: 'no-cors'
-            });
-
-            debugLog('Ответ сервера получен');
-            
-            document.getElementById('result').textContent = 'Данные отправлены! Отсканируйте новый QR-код.';
-            dataSent = true;
-            lastScannedData = null;
-            lastCode = null;
-            
-            // Скрываем кнопку Отправить из главного меню
-            tg.MainButton.hide();
-
-            // Сохраняем в историю
-            saveToHistory(qrData, timestamp, quantity);
-
-        } catch (error) {
-            debugLog('Ошибка:', {
-                message: error.message,
-                stack: error.stack
-            });
-            document.getElementById('result').textContent = `Ошибка при сохранении данных: ${error.message}`;
-        } finally {
-            isSending = false; // Снимаем блокировку отправки
-        }
-    }
-
     // Добавляем обработчик для кнопки логов
     document.getElementById('logsButton').addEventListener('click', () => {
         window.location.href = 'logs.html';
@@ -169,7 +156,11 @@ if (!window.Telegram.WebApp.initData) {
         localStorage.setItem('scan_history', JSON.stringify(history));
     }
 
+    document.getElementById('scanButton').addEventListener('click', showQRScanner);
     document.getElementById('historyButton').addEventListener('click', () => {
         window.location.href = 'history.html';
+    });
+    document.getElementById('logsButton').addEventListener('click', () => {
+        window.location.href = 'logs.html';
     });
 } 
