@@ -10,9 +10,11 @@ if (!window.Telegram.WebApp.initData) {
     let lastCode = null;
     let dataSent = false;
 
+    // Удаляем предыдущий обработчик MainButton при инициализации
+    tg.MainButton.offClick();
+
     function showQRScanner() {
         dataSent = false;
-        // Очищаем кнопку Отправить из главного меню
         tg.MainButton.hide();
         
         const par = {
@@ -38,21 +40,31 @@ if (!window.Telegram.WebApp.initData) {
                                 onchange="checkQuantity(this.value)">
                         </div>
                     `;
-                    document.getElementById('sendButton').style.display = 'none';
                 }
                 tg.closeScanQrPopup();
             }
         });
     }
 
-    document.getElementById('scanButton').addEventListener('click', () => {
-        showQRScanner();
-    });
-
-    document.getElementById('sendButton').addEventListener('click', async () => {
-        if (lastScannedData) {
+    // Устанавливаем один обработчик для MainButton
+    tg.MainButton.onClick(async () => {
+        if (lastScannedData && !dataSent) {
             await sendToGoogleSheets(lastScannedData);
         }
+    });
+
+    function checkQuantity(value) {
+        if (value && value.trim() !== '' && parseInt(value) > 0 && !dataSent) {
+            tg.MainButton.text = "Отправить";
+            tg.MainButton.show();
+        } else {
+            tg.MainButton.hide();
+        }
+    }
+
+    // Удаляем обработчик для sendButton, так как теперь используем только MainButton
+    document.getElementById('scanButton').addEventListener('click', () => {
+        showQRScanner();
     });
 
     // Добавим функцию форматирования даты
@@ -82,21 +94,6 @@ if (!window.Telegram.WebApp.initData) {
         localStorage.setItem('debug_logs', logMessage + '\n\n' + currentLogs);
         
         console.log(message, data);
-    }
-
-    // Изменим функцию проверки количества
-    function checkQuantity(value) {
-        if (value && value.trim() !== '' && parseInt(value) > 0 && !dataSent) {
-            tg.MainButton.text = "Отправить";
-            tg.MainButton.show();
-            tg.MainButton.onClick(async () => {
-                if (lastScannedData && !dataSent) {
-                    await sendToGoogleSheets(lastScannedData);
-                }
-            });
-        } else {
-            tg.MainButton.hide();
-        }
     }
 
     // Изменим функцию отправки данных
