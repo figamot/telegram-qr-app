@@ -8,11 +8,12 @@ if (!window.Telegram.WebApp.initData) {
 
     let lastScannedData = null;
     let lastCode = null;
-    let dataSent = false; // Флаг для отслеживания отправки данных
+    let dataSent = false;
 
     function showQRScanner() {
-        // Сбрасываем флаг при новом сканировании
         dataSent = false;
+        // Очищаем кнопку Отправить из главного меню
+        tg.MainButton.hide();
         
         const par = {
             text: "Наведите камеру на QR код"
@@ -85,20 +86,24 @@ if (!window.Telegram.WebApp.initData) {
 
     // Изменим функцию проверки количества
     function checkQuantity(value) {
-        const sendButton = document.getElementById('sendButton');
-        if (value && value.trim() !== '' && parseInt(value) > 0) {
-            sendButton.style.display = 'block';
+        if (value && value.trim() !== '' && parseInt(value) > 0 && !dataSent) {
+            tg.MainButton.text = "Отправить";
+            tg.MainButton.show();
+            tg.MainButton.onClick(async () => {
+                if (lastScannedData && !dataSent) {
+                    await sendToGoogleSheets(lastScannedData);
+                }
+            });
         } else {
-            sendButton.style.display = 'none';
+            tg.MainButton.hide();
         }
     }
 
     // Изменим функцию отправки данных
     async function sendToGoogleSheets(qrData) {
-        // Проверяем, были ли уже отправлены данные
         if (dataSent) {
             document.getElementById('result').textContent = 'Данные уже были отправлены. Отсканируйте новый QR-код.';
-            document.getElementById('sendButton').style.display = 'none';
+            tg.MainButton.hide();
             return;
         }
 
@@ -128,10 +133,12 @@ if (!window.Telegram.WebApp.initData) {
             debugLog('Ответ сервера получен');
             
             document.getElementById('result').textContent = 'Данные отправлены! Отсканируйте новый QR-код.';
-            document.getElementById('sendButton').style.display = 'none';
-            dataSent = true; // Устанавливаем флаг после успешной отправки
+            dataSent = true;
             lastScannedData = null;
             lastCode = null;
+            
+            // Скрываем кнопку Отправить из главного меню
+            tg.MainButton.hide();
 
             // Сохраняем в историю
             saveToHistory(qrData, timestamp, quantity);
