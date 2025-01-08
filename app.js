@@ -9,12 +9,14 @@ if (!window.Telegram.WebApp.initData) {
     let lastScannedData = null;
     let lastCode = null;
     let dataSent = false;
+    let isSending = false; // Флаг для блокировки повторной отправки во время запроса
 
     // Удаляем предыдущий обработчик MainButton при инициализации
     tg.MainButton.offClick();
 
     function showQRScanner() {
         dataSent = false;
+        isSending = false;
         tg.MainButton.hide();
         
         const par = {
@@ -48,13 +50,16 @@ if (!window.Telegram.WebApp.initData) {
 
     // Устанавливаем один обработчик для MainButton
     tg.MainButton.onClick(async () => {
-        if (lastScannedData && !dataSent) {
+        if (lastScannedData && !dataSent && !isSending) {
+            isSending = true; // Блокируем повторную отправку
+            tg.MainButton.disable(); // Делаем кнопку неактивной
             await sendToGoogleSheets(lastScannedData);
+            tg.MainButton.enable(); // Возвращаем активность кнопке
         }
     });
 
     function checkQuantity(value) {
-        if (value && value.trim() !== '' && parseInt(value) > 0 && !dataSent) {
+        if (value && value.trim() !== '' && parseInt(value) > 0 && !dataSent && !isSending) {
             tg.MainButton.text = "Отправить";
             tg.MainButton.show();
         } else {
@@ -98,8 +103,8 @@ if (!window.Telegram.WebApp.initData) {
 
     // Изменим функцию отправки данных
     async function sendToGoogleSheets(qrData) {
-        if (dataSent) {
-            document.getElementById('result').textContent = 'Данные уже были отправлены. Отсканируйте новый QR-код.';
+        if (dataSent || isSending) {
+            document.getElementById('result').textContent = 'Данные уже были отправлены или отправляются. Отсканируйте новый QR-код.';
             tg.MainButton.hide();
             return;
         }
@@ -109,6 +114,7 @@ if (!window.Telegram.WebApp.initData) {
         
         if (!quantity || quantity.trim() === '' || parseInt(quantity) <= 0) {
             document.getElementById('result').textContent = 'Введите количество!';
+            isSending = false;
             return;
         }
 
@@ -146,6 +152,8 @@ if (!window.Telegram.WebApp.initData) {
                 stack: error.stack
             });
             document.getElementById('result').textContent = `Ошибка при сохранении данных: ${error.message}`;
+        } finally {
+            isSending = false; // Снимаем блокировку отправки
         }
     }
 
