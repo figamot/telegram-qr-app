@@ -46,8 +46,8 @@ if (!window.Telegram.WebApp.initData) {
 
             debugLog('Данные успешно отправлены');
             
-            // Сохраняем в историю
-            saveToHistory(lastScannedData, timestamp, quantity);
+            // Сохраняем в историю с явным указанием количества
+            saveToHistory(lastScannedData, timestamp, parseInt(quantity));
             
             // Очищаем состояние
             dataSent = true;
@@ -151,9 +151,20 @@ if (!window.Telegram.WebApp.initData) {
 
     // Обновим функцию сохранения в историю
     function saveToHistory(qrData, timestamp, quantity) {
-        const history = JSON.parse(localStorage.getItem('scan_history') || '[]');
-        history.push({ qrData, timestamp, quantity });
-        localStorage.setItem('scan_history', JSON.stringify(history));
+        debugLog('Сохранение в историю:', { qrData, timestamp, quantity });
+        
+        try {
+            const history = JSON.parse(localStorage.getItem('scan_history') || '[]');
+            history.unshift({ 
+                qrData: qrData,
+                timestamp: timestamp,
+                quantity: quantity // Убедимся, что количество сохраняется
+            });
+            localStorage.setItem('scan_history', JSON.stringify(history));
+            debugLog('История успешно обновлена');
+        } catch (error) {
+            debugLog('Ошибка при сохранении в историю:', error);
+        }
     }
 
     document.getElementById('scanButton').addEventListener('click', showQRScanner);
