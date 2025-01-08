@@ -8,8 +8,12 @@ if (!window.Telegram.WebApp.initData) {
 
     let lastScannedData = null;
     let lastCode = null;
+    let dataSent = false; // Флаг для отслеживания отправки данных
 
     function showQRScanner() {
+        // Сбрасываем флаг при новом сканировании
+        dataSent = false;
+        
         const par = {
             text: "Наведите камеру на QR код"
         };
@@ -20,7 +24,6 @@ if (!window.Telegram.WebApp.initData) {
                     lastScannedData = data;
                     const timestamp = formatDate(new Date());
                     
-                    // Показываем результат и поле для ввода количества
                     document.getElementById('result').innerHTML = `
                         <div>Отсканировано: ${data}</div>
                         <div style="margin-top: 15px;">
@@ -34,7 +37,6 @@ if (!window.Telegram.WebApp.initData) {
                                 onchange="checkQuantity(this.value)">
                         </div>
                     `;
-                    // Кнопка отправки скрыта по умолчанию
                     document.getElementById('sendButton').style.display = 'none';
                 }
                 tg.closeScanQrPopup();
@@ -93,10 +95,16 @@ if (!window.Telegram.WebApp.initData) {
 
     // Изменим функцию отправки данных
     async function sendToGoogleSheets(qrData) {
+        // Проверяем, были ли уже отправлены данные
+        if (dataSent) {
+            document.getElementById('result').textContent = 'Данные уже были отправлены. Отсканируйте новый QR-код.';
+            document.getElementById('sendButton').style.display = 'none';
+            return;
+        }
+
         const quantityInput = document.getElementById('quantityInput');
         const quantity = quantityInput?.value;
         
-        // Усиленная проверка количества
         if (!quantity || quantity.trim() === '' || parseInt(quantity) <= 0) {
             document.getElementById('result').textContent = 'Введите количество!';
             return;
@@ -119,10 +127,14 @@ if (!window.Telegram.WebApp.initData) {
 
             debugLog('Ответ сервера получен');
             
-            document.getElementById('result').textContent = 'Данные отправлены!';
+            document.getElementById('result').textContent = 'Данные отправлены! Отсканируйте новый QR-код.';
             document.getElementById('sendButton').style.display = 'none';
+            dataSent = true; // Устанавливаем флаг после успешной отправки
             lastScannedData = null;
             lastCode = null;
+
+            // Сохраняем в историю
+            saveToHistory(qrData, timestamp, quantity);
 
         } catch (error) {
             debugLog('Ошибка:', {
@@ -138,14 +150,11 @@ if (!window.Telegram.WebApp.initData) {
         window.location.href = 'logs.html';
     });
 
-    // Изменим функцию сохранения в историю
-    function saveToHistory(qrData, timestamp) {
-        const quantity = document.getElementById('quantityInput')?.value;
-        if (quantity && parseInt(quantity) > 0) {
-            const history = JSON.parse(localStorage.getItem('scan_history') || '[]');
-            history.push({ qrData, timestamp, quantity });
-            localStorage.setItem('scan_history', JSON.stringify(history));
-        }
+    // Обновим функцию сохранения в историю
+    function saveToHistory(qrData, timestamp, quantity) {
+        const history = JSON.parse(localStorage.getItem('scan_history') || '[]');
+        history.push({ qrData, timestamp, quantity });
+        localStorage.setItem('scan_history', JSON.stringify(history));
     }
 
     document.getElementById('historyButton').addEventListener('click', () => {
