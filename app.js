@@ -113,7 +113,7 @@ if (!window.Telegram.WebApp.initData) {
                 lastCode = data;
                 
                 document.getElementById('result').innerHTML = `
-                    <div>Отсканировано: ${data}</div>
+                    <div>${data}</div>
                     <div style="margin-top: 15px;">
                         <input type="number" id="quantityInput" 
                             style="background: #242f3d; border: 1px solid #3498db; 
