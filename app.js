@@ -39,7 +39,7 @@ if (!window.Telegram.WebApp.initData) {
             const timestamp = formatDate(new Date());
             debugLog('Начало отправки данных:', { timestamp, lastScannedData, quantity, userName });
 
-            const url = new URL('https://script.google.com/macros/s/AKfycbzMB5fY5BI1BdrA8AbCyWfxmvS-Bu6x2CDtD3ACASO3JDqV1BhK8dPsyt-rb9JCgbeBQg/exec');
+            const url = new URL('https://script.google.com/macros/s/AKfycbwqkZvVQb6jwiuS43soUVLWDNqcnv6RPZyPEKpEK8ik-Se0mJM7vq_ayeDJubKnR0Lk/exec');
             url.searchParams.append('timestamp', timestamp);
             url.searchParams.append('qrData', lastScannedData);
             url.searchParams.append('quantity', quantity);
