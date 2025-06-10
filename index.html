@@ -39,7 +39,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start; /* Изменено с center на flex-start */
             min-height: 300px;
         }
         .button-container {
@@ -69,18 +69,9 @@
         }
         #result {
             color: #fff;
-            margin-top: -40px;
+            margin-top: 20px; /* Увеличено расстояние от кнопки */
             font-size: 18px;
         }
-        /*.qr-placeholder {
-            border: 2px solid #3498db;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-        }*/
     </style>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
@@ -114,4 +105,4 @@
     </div>
     <script src="app.js"></script>
 </body>
-</html> 
+</html>
