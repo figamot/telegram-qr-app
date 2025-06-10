@@ -50,12 +50,11 @@
             right: 0;
             padding: 20px;
             display: flex;
-            justify-content: center; /* Изменено на center для центрирования */
+            justify-content: space-between;
             background-color: #17212b;
-            gap: 20px; /* Добавлен отступ между кнопками */
         }
         
-        /* Новые стили кнопок */
+        /* Новые стили для кнопок */
         .action-button {
             background: #17212b;
             border: none;
@@ -129,6 +128,22 @@
             0% { transform: scale(1); opacity: 1; }
             100% { transform: scale(1.15); opacity: 0; }
         }
+        
+        /* Новые стили для расположения кнопок */
+        .center-buttons {
+            display: flex;
+            justify-content: center;
+            flex-grow: 1;
+        }
+        .right-button {
+            margin-left: auto;
+        }
+        #logsButton {
+            color: #17212b; /* Цвет как у фона */
+        }
+        #logsButton:hover {
+            color: #2ea6ff; /* При наведении возвращаем видимость */
+        }
     </style>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
@@ -151,9 +166,15 @@
                 <span class="material-icons">upload</span>
                 Отправить
             </button>
-            <button class="action-button" id="historyButton">
-                <span class="material-icons">history</span>
-                История
+            <div class="center-buttons">
+                <button class="action-button" id="historyButton">
+                    <span class="material-icons">history</span>
+                    История
+                </button>
+            </div>
+            <button class="action-button right-button" id="logsButton">
+                <span class="material-icons">more_horiz</span>
+                Log
             </button>
         </div>
     </div>
