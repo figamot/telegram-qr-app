@@ -50,11 +50,10 @@
             right: 0;
             padding: 20px;
             display: flex;
-            justify-content: space-between;
             background-color: #17212b;
         }
         
-        /* Новые стили для кнопок */
+        /* Стили кнопок */
         .action-button {
             background: #17212b;
             border: none;
@@ -90,7 +89,7 @@
             margin-top: auto;
         }
         
-        /* Стиль для кнопки сканирования */
+        /* Кнопка сканирования */
         #scanButton {
             background: rgba(46, 166, 255, 0.1);
             border: 2px solid #2ea6ff;
@@ -129,29 +128,35 @@
             100% { transform: scale(1.15); opacity: 0; }
         }
         
-        /* Новые стили для расположения кнопок */
-        .center-buttons {
+        /* Новые стили для точного центрирования */
+        .button-group {
             display: flex;
-            justify-content: center;
-            flex-grow: 1;
+            width: 100%;
+            position: relative;
         }
-        .right-button {
+        .history-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .log-right {
             margin-left: auto;
         }
         #logsButton {
-            color: #17212b; /* Цвет как у фона */
+            color: #17212b;
         }
         #logsButton:hover {
-            color: #2ea6ff; /* При наведении возвращаем видимость */
+            color: #2ea6ff;
+        }
+        #sendButton {
+            margin-right: auto;
         }
     </style>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            
-        </div>
+        <div class="header"></div>
         <div class="qr-frame">
             <div id="result"></div>
             <div class="scan-button-container">
@@ -162,20 +167,20 @@
             </div>
         </div>
         <div class="button-container">
-            <button class="action-button" id="sendButton" style="display: none;">
-                <span class="material-icons">upload</span>
-                Отправить
-            </button>
-            <div class="center-buttons">
-                <button class="action-button" id="historyButton">
+            <div class="button-group">
+                <button class="action-button" id="sendButton" style="display: none;">
+                    <span class="material-icons">upload</span>
+                    Отправить
+                </button>
+                <button class="action-button history-center" id="historyButton">
                     <span class="material-icons">history</span>
                     История
                 </button>
+                <button class="action-button log-right" id="logsButton">
+                    <span class="material-icons">more_horiz</span>
+                    Log
+                </button>
             </div>
-            <button class="action-button right-button" id="logsButton">
-                <span class="material-icons">more_horiz</span>
-                Log
-            </button>
         </div>
     </div>
     <script src="app.js"></script>
