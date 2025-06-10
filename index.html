@@ -39,8 +39,9 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start; /* Изменено с center на flex-start */
+            justify-content: center;
             min-height: 300px;
+            position: relative;
         }
         .button-container {
             position: fixed;
@@ -69,8 +70,11 @@
         }
         #result {
             color: #fff;
-            margin-top: 20px; /* Увеличено расстояние от кнопки */
+            margin-bottom: 20px;
             font-size: 18px;
+        }
+        .scan-button-container {
+            margin-top: auto;
         }
     </style>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -81,11 +85,13 @@
             
         </div>
         <div class="qr-frame">
-            <button class="action-button" id="scanButton">
-                <span class="material-icons">qr_code_scanner</span>
-                Сканировать
-            </button>
             <div id="result"></div>
+            <div class="scan-button-container">
+                <button class="action-button" id="scanButton">
+                    <span class="material-icons">qr_code_scanner</span>
+                    Сканировать
+                </button>
+            </div>
         </div>
         <div class="button-container">
             
